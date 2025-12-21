@@ -1,5 +1,5 @@
 {
-  "name": "config_server",
+  "name": "mobiles-apps-features",
   "version": "1.0.0",
   "description": "Server de configuration de mise a jour des differentes applications mobiles",
   "main": "index.js",
