@@ -1,0 +1,67 @@
+<nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+      <i class="bi bi-phone brand-icon"></i>
+      <div>
+        <div class="fw-bold">Mobile Apps Features</div>
+        <small class="text-muted d-none d-md-block" style="font-size: 0.7rem;">
+          IT Solutions Services
+        </small>
+      </div>
+    </a>
+
+    <div class="d-flex gap-2 align-items-center">
+      <button class="btn theme-toggle" onclick="toggleTheme()" title="Changer le thème">
+        <span id="themeIcon">🌓</span>
+      </button>
+
+      <a id="navbar-link" href="/admin"  class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
+        <i id="navbar-icon" class="bi bi-gear"></i>
+        <span id="navbar-label" class="d-none d-md-inline">Configuration</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<script>
+    function initNavbar(configOverride = {}) {
+
+    const params = new URLSearchParams(window.location.search);
+    
+    const navbar = document.getElementById('navbar');
+        if (!navbar) {
+            console.warn('Navbar element not found');
+            return;
+        }
+    
+     const config = {
+    path: navbar.dataset.path || '/admin',
+    icon: navbar.dataset.icon || 'bi-gear',
+    label: navbar.dataset.label || 'Configuration',
+    ...configOverride // permet de surcharger si besoin
+  };
+    updateNavbarLink(config);
+    
+    // Charger le thème sauvegardé
+    loadSavedTheme();
+  }
+
+  function updateNavbarLink(config) {
+    const linkEl = document.getElementById("navbar-link");
+    const iconEl = document.getElementById("navbar-icon");
+    const labelEl = document.getElementById("navbar-label");
+    alert(labelEl);
+    if (linkEl) linkEl.href = config.path;
+    if (iconEl) iconEl.className = `bi ${config.icon}`;
+    if (labelEl) labelEl.textContent = config.label;
+  }
+  
+  function loadSavedTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-bs-theme', savedTheme);
+    const icon = document.getElementById('themeIcon');
+    if (icon) icon.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+  }
+  
+  document.addEventListener('DOMContentLoaded', () => initNavbar());
+</script>

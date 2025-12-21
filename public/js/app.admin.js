@@ -291,27 +291,78 @@ function updateEditorStatus(text) {
   const badgeClass = badges[text] || 'secondary';
   status.innerHTML = `<span class="badge bg-${badgeClass}">${text}</span>`;
 }
+// ============================================
+// Monaco Editor Setup
+// ============================================
+function initMonaco() {
+  require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
+  
+  require(['vs/editor/editor.main'], function() {
+    monacoEditor = monaco.editor.create(document.getElementById('monacoEditor'), {
+      value: '// Sélectionnez un fichier pour commencer',
+      language: 'json',
+      theme: document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'vs-dark' : 'vs',
+      automaticLayout: true,
+      minimap: { enabled: true },
+      fontSize: 14,
+      lineNumbers: 'on',
+      roundedSelection: false,
+      scrollBeyondLastLine: false,
+      readOnly: false,
+      cursorStyle: 'line',
+      formatOnPaste: true,
+      formatOnType: true
+    });
 
-function showToast(title, message, type = 'info') {
-  const container = document.getElementById('toastContainer');
-  const toastId = `toast-${Date.now()}`;
+    // Détecter les changements
+    monacoEditor.onDidChangeModelContent(() => {
+      const hasChanges = monacoEditor.getValue() !== originalContent;
+      toggleSaveButton(hasChanges);
+      updateEditorStatus(hasChanges ? 'Modifié' : 'Sauvegardé');
+    });
+
+    // Fallback: cacher le textarea
+    document.getElementById('editor').style.display = 'none';
+  });
+}
+
+// ============================================
+// Charger les stats API
+// ============================================
+async function loadHealthStats() {
+  try {
+    const res = await fetch('/api/health');
+    const data = await res.json();
+    
+    document.getElementById('apiVersion').textContent = data.version || 'N/A';
+    document.getElementById('apiUptime').textContent = `${data.uptime || 0}s`;
+  } catch (error) {
+    console.error('Erreur chargement stats:', error);
+    document.getElementById('apiVersion').textContent = 'Erreur';
+    document.getElementById('apiUptime').textContent = 'N/A';
+  }
+}
+
+
+function initialize() {
+ 
+// ============================================
+// Initialisation
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+  initMonaco();
+  loadHealthStats();
+  loadFileTree();
+
+   loadFooter("admin-footer");
   
-  const toast = document.createElement('div');
-  toast.id = toastId;
-  toast.className = 'toast';
-  toast.setAttribute('role', 'alert');
-  toast.innerHTML = `
-    <div class="toast-header bg-${type} text-white">
-      <strong class="me-auto">${title}</strong>
-      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
-    </div>
-    <div class="toast-body">${message}</div>
-  `;
-  
-  container.appendChild(toast);
-  
-  const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
-  bsToast.show();
-  
-  toast.addEventListener('hidden.bs.toast', () => toast.remove());
+  // Rafraîchir les stats toutes les 30s
+    setInterval(loadHealthStats, 30000);
+    });
+}
+
+
+function showAbout(modalId) {
+  var modal =  new bootstrap.Modal(document.getElementById(modalId), {});
+  if(modal) modal.show();
 }
