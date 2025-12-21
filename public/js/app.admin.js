@@ -157,24 +157,22 @@ function refreshFiles() {
  
 
 function renderFileTree(data) {
-  const tree = document.getElementById('fileTree');
-  tree.innerHTML = '';
+  const tree = document.getElementById("fileTree");
+  tree.innerHTML = "";
 
   if (!data || Object.keys(data).length === 0) {
     tree.innerHTML = '<p class="text-muted small">Aucun fichier trouvé</p>';
     return;
   }
 
- 
- 
   // Parcourir chaque catégorie
   Object.entries(data).forEach(([category, files], index) => {
     // En-tête de catégorie (collapsible)
     const categoryId = `category-${index}`;
     const collapseId = `collapse-${index}`;
-    
-    const categoryHeader = document.createElement('div');
-    categoryHeader.className = 'mb-2';
+
+    const categoryHeader = document.createElement("div");
+    categoryHeader.className = "mb-2";
     categoryHeader.innerHTML = `
       <button 
         class="btn btn-sm btn-outline-secondary w-100 text-start d-flex align-items-center justify-content-between"
@@ -190,42 +188,42 @@ function renderFileTree(data) {
         <span class="collapse-icon">▼</span>
       </button>
     `;
-    
+
     tree.appendChild(categoryHeader);
 
     // Liste des fichiers (collapsible)
-    const fileList = document.createElement('div');
+    const fileList = document.createElement("div");
     fileList.id = collapseId;
-    fileList.className = 'collapse show';
+    fileList.className = "collapse show";
     fileList.innerHTML = '<div class="ps-2 mb-3"></div>';
-    
-    const container = fileList.querySelector('div');
+
+    const container = fileList.querySelector("div");
 
     // Ajouter chaque fichier
-    files.forEach(filename => {
-      const item = document.createElement('div');
-      item.className = 'file-item';
-      item.setAttribute('data-category', category);
-      item.setAttribute('data-filename', filename);
+    files.forEach((filename) => {
+      const item = document.createElement("div");
+      item.className = "file-item";
+      item.setAttribute("data-category", category);
+      item.setAttribute("data-filename", filename);
       item.onclick = () => openFile(category, filename);
-      
+
       const icon = getFileIcon(filename);
       item.innerHTML = `
         <span class="file-icon">${icon}</span>
         <span class="flex-grow-1">${filename}</span>
       `;
-      
+
       container.appendChild(item);
     });
-    
+
     tree.appendChild(fileList);
 
     // Animation de l'icône collapse
-    categoryHeader.querySelector('button').addEventListener('click', (e) => {
-      const icon = e.currentTarget.querySelector('.collapse-icon');
+    categoryHeader.querySelector("button").addEventListener("click", (e) => {
+      const icon = e.currentTarget.querySelector(".collapse-icon");
       setTimeout(() => {
-        const isExpanded = fileList.classList.contains('show');
-        icon.textContent = isExpanded ? '▼' : '▶';
+        const isExpanded = fileList.classList.contains("show");
+        icon.textContent = isExpanded ? "▼" : "▶";
       }, 200);
     });
   });
