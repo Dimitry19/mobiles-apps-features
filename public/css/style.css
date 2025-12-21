@@ -1,0 +1,14 @@
+﻿    .itss {
+        font-weight: bold;
+        color: #e1d7eb;
+    }
+    .itss-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 2px solid #eee;
+        color: #dfbf22;
+        font-size: 0.95em;
+    }

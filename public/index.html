@@ -1,0 +1,47 @@
+﻿<!DOCTYPE html>
+<html lang="fr" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+   <title>Home - Mobiles Apps features</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/style.css">
+
+</head>
+<body class="bg-body text-body">
+
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+      <span class="fw-bold"><i class="bi bi-toggle-on" style="font-size: 2rem; color: cornflowerblue;"></i> Mobiles Apps features</span>
+      <span class="badge bg-primary status-badge">IT Solutions Services</span>
+    </a>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary btn-sm" onclick="toggleTheme()">🌓</button>
+      <a href="/admin" class="btn btn-outline-primary btn-sm">Conf.</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container min-vh-100 mt-5">
+  <div class="card shadow">
+    <div class="card-body text-center">
+      <h3 class="card-title">Statut du serveur</h3>
+      <p id="status" class="fw-bold">⏳ Vérification...</p>
+      <button class="btn btn-primary" onclick="checkStatus()">Vérifier API</button>
+    </div>
+  </div>
+</div>
+<div class="itss-container">
+    <p>
+      <i class="bi bi-bootstrap-fill"></i> Powered by Bootstrap
+    </p>
+    <p class="itss"> IT Solutions Services - Web &amp; Mobile Apps</p>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

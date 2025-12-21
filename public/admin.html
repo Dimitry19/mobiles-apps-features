@@ -1,0 +1,308 @@
+﻿<!DOCTYPE html>
+<html lang="fr" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Administration - Mobiles Apps features</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"  crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <!-- Monaco Editor (IDE-like experience) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/editor/editor.main.min.css"  crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/admin-style.css">
+ 
+</head>
+<body>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Header -->
+<nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+      <span class="fw-bold"><i class="bi bi-toggle-on" style="font-size: 2rem; color: cornflowerblue;"></i> Mobiles Apps features</span>
+      <span class="badge bg-primary status-badge">IT Solutions Services</span>
+    </a>
+
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-sm btn-outline-secondary" onclick="toggleTheme()" title="Changer le thème">
+        <span id="themeIcon">🌓</span>
+      </button>
+      <a href="/" class="btn btn-sm btn-outline-primary">
+        ← Accueil
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- Sidebar - Liste des fichiers -->
+<div id="sidebar">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="mb-0 text-muted">📂 Fichiers de configuration</h6>
+    <button class="btn btn-sm btn-outline-secondary" onclick="refreshFiles()" title="Rafraîchir">
+      <span id="refreshIcon">🔄</span>
+    </button>
+  </div>
+
+  <div id="fileTree"></div>
+
+  <div class="mt-4 p-3 bg-body-secondary rounded">
+    <h6 class="small text-muted mb-2">ℹ️ Statistiques</h6>
+    <div class="small">
+      <div class="mb-1">
+        <strong>Version:</strong> <span id="apiVersion" class="text-primary">...</span>
+      </div>
+      <div>
+        <strong>Uptime:</strong> <span id="apiUptime" class="text-success">...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer mt-5">
+  <div class="container-fluid">
+    <div class="row align-items-center">
+      <!-- Informations -->
+      <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+        <span class="text-muted">
+          🚀 <strong>Mobiles Apps features</strong> v<span id="footerVersion">1.0.0</span>
+        </span>
+        <span class="text-muted mx-2">•</span>
+        <span class="text-muted">
+          Fait avec ❤️ par <strong>IT Solutions Services</strong>
+        </span>
+      </div>
+
+      <!-- Liens et stats -->
+      <div class="col-md-6 text-center text-md-end">
+        <div class="d-flex justify-content-center justify-content-md-end align-items-center gap-3 flex-wrap">
+          <span class="badge bg-success" title="Statut du serveur">
+            <span class="spinner-grow spinner-grow-sm me-1" role="status" style="width: 0.5rem; height: 0.5rem;"></span>
+            En ligne
+          </span>
+          
+          <span class="text-muted">
+            <small>Uptime: <strong id="footerUptime">0s</strong></small>
+          </span>
+
+          <span class="text-muted">•</span>
+
+          <a href="/api/health" target="_blank" class="text-decoration-none text-muted" title="API Health Check">
+            <small>📊 Health</small>
+          </a>
+
+          <a href="https://github.com" target="_blank" class="text-decoration-none text-muted" title="Documentation">
+            <small>📚 Docs</small>
+          </a>
+
+          <button class="btn btn-sm btn-link text-muted p-0" onclick="showAbout()" title="À propos">
+            <small>ℹ️ À propos</small>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barre de progression (optionnelle - pour montrer l'activité) -->
+    <div class="mt-2">
+      <div class="progress" style="height: 2px;">
+        <div id="activityBar" class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Modal À propos -->
+<div class="modal fade" id="aboutModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <span class="me-2">🚀</span> À propos
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center mb-3">
+          <div style="font-size: 3rem;">⚙️</div>
+          <h4 class="mt-2">Console d'administration</h4>
+          <p class="text-muted">Interface d'administration</p>
+        </div>
+
+        <hr>
+
+        <div class="mb-3">
+          <h6 class="text-muted mb-2">Informations système</h6>
+          <ul class="list-unstyled small">
+            <li class="mb-2">
+              <strong>Version:</strong> 
+              <span class="badge bg-primary ms-2" id="aboutVersion">1.0.0</span>
+            </li>
+            <li class="mb-2">
+              <strong>Node.js:</strong> 
+              <span class="text-muted ms-2" id="aboutNode">v18.x</span>
+            </li>
+            <li class="mb-2">
+              <strong>Uptime:</strong> 
+              <span class="text-success ms-2" id="aboutUptime">0s</span>
+            </li>
+            <li class="mb-2">
+              <strong>Environnement:</strong> 
+              <span class="badge bg-success ms-2" id="aboutEnv">Production</span>
+            </li>
+          </ul>
+        </div>
+
+        <hr>
+
+        <div class="mb-3">
+          <h6 class="text-muted mb-2">Technologies utilisées</h6>
+          <div class="d-flex flex-wrap gap-2">
+            <span class="badge bg-secondary">Bootstrap 5.3</span>
+            <span class="badge bg-secondary">Monaco Editor</span>
+            <span class="badge bg-secondary">Node.js</span>
+            <span class="badge bg-secondary">Express</span>
+          </div>
+        </div>
+
+        <div class="alert alert-info small mb-0">
+          <strong>💡 Astuce:</strong> Utilisez <kbd>Ctrl</kbd> + <kbd>S</kbd> pour sauvegarder rapidement vos modifications.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Zone Éditeur -->
+<div id="editorZone">
+  <!-- Header de l'éditeur -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h5 class="mb-1" id="currentFileName">
+        <span class="text-muted">📝</span> Sélectionnez un fichier
+      </h5>
+      <small class="text-muted" id="currentFilePath"></small>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary" onclick="revertChanges()" id="revertBtn" disabled>
+        ↶ Annuler
+      </button>
+      <button class="btn btn-success" onclick="saveFile()" id="saveBtn" disabled>
+        <span id="saveIcon">💾</span> Sauvegarder
+      </button>
+    </div>
+  </div>
+
+  <!-- Éditeur Monaco -->
+  <div id="monacoEditor"></div>
+
+  <!-- Fallback: Textarea simple -->
+  <textarea id="editor" class="form-control" rows="20" placeholder="Chargement de l'éditeur..."></textarea>
+
+  <!-- Informations sur les modifications -->
+  <div class="mt-3">
+    <small class="text-muted" id="editorStatus">
+      <span class="badge bg-secondary">Prêt</span>
+    </small>
+  </div>
+</div>
+<div class="itss-container">
+    <p>
+      <i class="bi bi-bootstrap-fill"></i> Powered by Bootstrap
+    </p>
+    <p class="itss"> IT Solutions Services - Web &amp; Mobile Apps</p>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"  crossorigin="anonymous"></script>
+
+<!-- Monaco Editor -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script src="js/app.js"></script>
+<script src="js/app.admin.js"></script>
+
+<script>
+// ============================================
+// Configuration
+// ============================================
+let currentFile = null;
+let originalContent = '';
+let monacoEditor = null;
+let files = [];
+
+// ============================================
+// Initialisation
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+  initMonaco();
+  loadHealthStats();
+  loadFileTree();
+  
+  // Rafraîchir les stats toutes les 30s
+  setInterval(loadHealthStats, 30000);
+});
+
+// ============================================
+// Monaco Editor Setup
+// ============================================
+function initMonaco() {
+  require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
+  
+  require(['vs/editor/editor.main'], function() {
+    monacoEditor = monaco.editor.create(document.getElementById('monacoEditor'), {
+      value: '// Sélectionnez un fichier pour commencer',
+      language: 'json',
+      theme: document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'vs-dark' : 'vs',
+      automaticLayout: true,
+      minimap: { enabled: true },
+      fontSize: 14,
+      lineNumbers: 'on',
+      roundedSelection: false,
+      scrollBeyondLastLine: false,
+      readOnly: false,
+      cursorStyle: 'line',
+      formatOnPaste: true,
+      formatOnType: true
+    });
+
+    // Détecter les changements
+    monacoEditor.onDidChangeModelContent(() => {
+      const hasChanges = monacoEditor.getValue() !== originalContent;
+      toggleSaveButton(hasChanges);
+      updateEditorStatus(hasChanges ? 'Modifié' : 'Sauvegardé');
+    });
+
+    // Fallback: cacher le textarea
+    document.getElementById('editor').style.display = 'none';
+  });
+}
+
+// ============================================
+// Charger les stats API
+// ============================================
+async function loadHealthStats() {
+  try {
+    const res = await fetch('/api/health');
+    const data = await res.json();
+    
+    document.getElementById('apiVersion').textContent = data.version || 'N/A';
+    document.getElementById('apiUptime').textContent = `${data.uptime || 0}s`;
+  } catch (error) {
+    console.error('Erreur chargement stats:', error);
+    document.getElementById('apiVersion').textContent = 'Erreur';
+    document.getElementById('apiUptime').textContent = 'N/A';
+  }
+}
+
+</script>
+</body>
+</html>
