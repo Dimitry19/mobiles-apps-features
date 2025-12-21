@@ -4,7 +4,7 @@
   "description": "Server de configuration de mise a jour des differentes applications mobiles",
   "main": "index.js",
   "engines": {
-    "node": "18.x"
+    "node": "24.x"
   },
   "scripts": {
     "start": "nodemon index.js",
