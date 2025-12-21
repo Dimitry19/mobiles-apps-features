@@ -53,85 +53,47 @@ if (savedTheme) {
 }
 
 
+async function load(containerId, config = {}) {
+  const { label = "Accueil", path = "/admin", icon = "bi-house" } = config;
 
+  try {
+    // Construire l'URL avec les paramètres
+    const navbarUrl = new URL("/partials/navbar.html", window.location.origin);
+    navbarUrl.searchParams.set("label", label);
+    navbarUrl.searchParams.set("path", path);
+    navbarUrl.searchParams.set("icon", icon);
 
+    // Charger la navbar
+    const response = await fetch(navbarUrl);
 
-
-  async function  load(containerId, config = {}) {
-    const {
-      label = 'Accueil',
-      path = '/admin',
-      icon = 'bi-house'
-    } = config;
-    
-    try {
-      // Construire l'URL avec les paramètres
-      const navbarUrl = new URL('/partials/navbar.html', window.location.origin);
-      navbarUrl.searchParams.set('label', label);
-      navbarUrl.searchParams.set('path', path);
-      navbarUrl.searchParams.set('icon', icon);
-      
-      // Charger la navbar
-      const response = await fetch(navbarUrl);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      const html = await response.text();
-      
-      // Injecter dans le DOM
-      const container = document.getElementById(containerId);
-      
-      if (!container) {
-        throw new Error(`Container with id "${containerId}" not found`);
-      }
-      
-      container.innerHTML = html;
-      
-      console.log('✅ Navbar loaded successfully');
-      
-    } catch (error) {
-      console.error('❌ Error loading navbar:', error);
-      this.showFallbackNavbar(containerId, config);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
+
+    const html = await response.text();
+
+    // Injecter dans le DOM
+    const container = document.getElementById(containerId);
+
+    if (!container) {
+      throw new Error(`Container with id "${containerId}" not found`);
+    }
+
+    container.innerHTML = html;
+
+    console.log("✅ Navbar loaded successfully");
+  } catch (error) {
+    console.error("❌ Error loading navbar:", error);
+    this.showFallbackNavbar(containerId, config);
   }
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function loadNavbar(navbarId){
- 
-    fetch('/partials/navbar.html')
-    .then(res => res.text())
-    .then(html => {
+function loadNavbar(navbarId) {
+  fetch("/partials/navbar.html")
+    .then((res) => res.text())
+    .then((html) => {
       document.getElementById(navbarId).innerHTML = html;
-     const container = document.getElementById(navbarId);
+      const container = document.getElementById(navbarId);
       container.innerHTML = html;
     });
 }

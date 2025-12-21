@@ -40,6 +40,7 @@ async function checkStatus() {
     // Afficher les détails
     detailsEl.classList.remove("d-none");
     document.getElementById("apiVersion").textContent = data.version || "N/A";
+    document.getElementById("apiNodeVersion").textContent = data.node || "N/A";
     document.getElementById("apiUptime").textContent = formatUptime(
       data.uptime || 0
     );

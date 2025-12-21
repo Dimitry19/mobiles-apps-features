@@ -1,0 +1,20 @@
+﻿ body {
+      background: var(--bs-body-bg, #f8f9fa);
+      transition: background 0.3s;
+    }
+
+    .main {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+      padding: 2rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+   
+      transition: background-color 0.3s, color 0.3s;
+    }

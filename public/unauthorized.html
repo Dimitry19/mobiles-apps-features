@@ -2,18 +2,85 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Accès refusé</title>
-  <style>
-    body { font-family: sans-serif; text-align: center; padding-top: 50px; background: #f8f9fa; color: #333; }
-    h1 { color: #dc3545; }
-    a { color: #0d6efd; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Unauthorized Access - Mobiles Apps features</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <script src="js/common.js"></script>
+  <link rel="stylesheet" href="css/unauthorized-style.css">
+ 
+ 
 </head>
 <body>
-  <h1>Accès refusé</h1>
-  <p>Vous n'avez pas les droits pour accéder à cette page.</p>
-  <a href="/">Retour à l'accueil</a>
+
+    <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <i class="bi bi-phone brand-icon"></i>
+                <div>
+                    <div class="fw-bold">Mobile Apps Features</div>
+                    <small class="text-muted d-none d-md-block" style="font-size: 0.7rem;">IT Solutions Services</small>
+                </div>
+            </a>
+    
+            <div class="d-flex gap-2 align-items-center">
+                <button class="btn theme-toggle" onclick="toggleTheme()" title="Changer le thème">
+                    <span id="themeIcon">🌓</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main">
+        <div class="card app-card">
+        <i class="bi bi-shield-exclamation text-danger mb-3" style="font-size: 3rem;"></i>
+        <h2 class="text-danger mb-2">Accès refusé</h2>
+
+        <p class="text-muted">
+            Vous n'avez pas les droits nécessaires pour accéder à cette page.
+        </p>
+
+        <p class="small text-muted mt-3">
+            Redirection vers la page de connexion dans
+            <strong><span id="countdown">10</span></strong> secondes…
+        </p>
+
+        <div class="d-grid gap-2 mt-4">
+        <a href="/login" class="btn btn-danger">
+            <i class="bi bi-box-arrow-in-right me-1"></i>
+            Se connecter maintenant
+        </a>
+
+        <a href="/" class="btn btn-outline-secondary">
+            <i class="bi bi-house me-1"></i>
+            Accueil
+        </a>
+        </div>
+    </div>
+
+    </div>
+
+    
+
+  <script>
+    // Thème synchronisé
+    const theme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-bs-theme', theme);
+
+    // Countdown + redirection
+    let seconds = 10;
+    const el = document.getElementById('countdown');
+
+    const timer = setInterval(() => {
+      seconds--;
+      el.textContent = seconds;
+      if (seconds <= 0) {
+        clearInterval(timer);
+        window.location.href = '/';
+      }
+    }, 1000);
+  </script>
+
 </body>
 </html>

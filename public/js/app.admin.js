@@ -362,7 +362,22 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 
 
-function showAbout(modalId) {
-  var modal =  new bootstrap.Modal(document.getElementById(modalId), {});
-  if(modal) modal.show();
+async function showAbout(modalId) {
+  const response = await fetch("/api/health");
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  document.getElementById("aboutVersion").textContent = data.version || "N/A";
+  document.getElementById("aboutNode").textContent = data.node || "N/A";
+  document.getElementById("aboutEnv").textContent = data.environment || "N/A";
+  document.getElementById("aboutUptime").textContent = formatUptime(
+    data.uptime || 0
+  );
+
+  var modal = new bootstrap.Modal(document.getElementById(modalId), {});
+  if (modal) modal.show();
 }
