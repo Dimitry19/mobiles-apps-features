@@ -14,42 +14,64 @@ const ADMIN_USER = process.env.BASIC_USER || 'admin';
 const ADMIN_PASS = process.env.BASIC_PASS || 'password';
 
  const adminAuthMiddleware = basicAuth({
-    users: { [ADMIN_USER]: ADMIN_PASS },
-    challenge: true, // affiche la fenêtre de login
-    unauthorizedResponse: 'Accès refusé'
-});
+   users: { [ADMIN_USER]: ADMIN_PASS },
+   challenge: true, // affiche la fenêtre de login(native du navigateur)
+   unauthorizedResponse: "Accès refusé",
+ });
 
- 
+ function adminAuthMiddlewares(req, res, next) {
+   const auth = req.headers.authorization;
 
-// ==== Fonction récursive pour lister les fichiers JSON ====
-function listJsonFiles(dir) {
-  const result = {};
+   if (!auth) {
+     // pas d'authentification => redirection
+     return res
+       .status(401)
+       .sendFile(path.join(__dirname, "../public/unauthorized.html"));
+   }
 
-  fs.readdirSync(dir).forEach(item => {
-    const itemPath = path.join(dir, item);
-    const stats = fs.statSync(itemPath);
+   // basic auth "Basic base64(user:pass)"
+   const base64Credentials = auth.split(" ")[1];
+   const credentials = Buffer.from(base64Credentials, "base64").toString(
+     "ascii"
+   );
+   const [user, pass] = credentials.split(":");
 
-    if (stats.isDirectory()) {
-      const subResult = listJsonFiles(itemPath);
-      if (Object.keys(subResult).length > 0) {
-        result[item] = subResult;
-      }
-    } else if (stats.isFile() && item.endsWith('.json')) {
-      if (!result.files) result.files = [];
-      result.files.push(item);
-    }
-  });
+   if (user === ADMIN_USER && pass === ADMIN_PASS) {
+     return next(); // autorisé
+   }
 
-  return result;
-}
+   // mauvaise auth => redirection
+   return res
+     .status(401)
+     .sendFile(path.join(__dirname, "../public/unauthorized.html"));
+ }
 
+ // ==== Fonction récursive pour lister les fichiers JSON ====
+ function listJsonFiles(dir) {
+   const result = {};
 
+   fs.readdirSync(dir).forEach((item) => {
+     const itemPath = path.join(dir, item);
+     const stats = fs.statSync(itemPath);
 
+     if (stats.isDirectory()) {
+       const subResult = listJsonFiles(itemPath);
+       if (Object.keys(subResult).length > 0) {
+         result[item] = subResult;
+       }
+     } else if (stats.isFile() && item.endsWith(".json")) {
+       if (!result.files) result.files = [];
+       result.files.push(item);
+     }
+   });
 
-// Route principale admin
-router.get('/admin', adminAuthMiddleware,(req, res) => {
-  res.sendFile(path.join(__dirname, '../public/admin.html'));
-});
+   return result;
+ }
+
+ // Route principale admin
+ router.get("/admin", adminAuthMiddleware, (req, res) => {
+   res.sendFile(path.join(__dirname, "../public/admin.html"));
+ });
 
 
 router.get('/filesdd', (req, res) => {
