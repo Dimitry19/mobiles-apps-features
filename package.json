@@ -15,6 +15,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.26.1",
   "dependencies": {
+    "@vercel/kv": "^3.0.0",
     "body-parser": "^2.2.1",
     "bootstrap-icons": "^1.13.1",
     "cors": "^2.8.5",
