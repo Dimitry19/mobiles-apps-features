@@ -4,6 +4,9 @@ const fs = require('fs');
 const path = require('path');
 const { readJsonSafe } = require('../utils/jsonReader');
 const { kv } = require("@vercel/kv");
+const { MongoClient } = require("mongodb");
+
+const client = new MongoClient(process.env.MONGODB_URI);
 
 const router = express.Router();
 const BASE_DIR = path.join(__dirname, "../data");
@@ -52,7 +55,7 @@ router.get("/file", (req, res) => {
   if (isLocal) {
     fileSystemRead(category, file, res);
   } else {
-    databaseKvRead(category, file, res);
+    databaseMongoDbRead(category, file, res);
   }
 });
 
@@ -79,20 +82,33 @@ router.put("/file/:category/:filename", express.json(), async (req, res) => {
   if (isLocal) {
     fileSystemUpdate(category, filename, content, res);
   } else {
-    databaseKvUpdate(category, filename, content, res);
+    databaseMongoDbUpdate(category, filename, content, res);
   }
 });
 
-async function databaseKvUpdate(category, filename, content, res) {
+async function databaseMongoDbUpdate(category, filename, content, res) {
   try {
-    const key = `files:${category}:${filename}`;
-    await kv.set(key, content);
+    await client.connect();
+    const db = client.db("config_server");
+    const collection = db.collection("files");
 
-    res.json({ success: true, message: "Fichier sauvegardé dans Vercel KV" });
+    // Upsert (insert ou update)
+    await collection.updateOne(
+      { category, filename },
+      {
+        $set: {
+          content,
+          updatedAt: new Date(),
+        },
+      },
+      { upsert: true }
+    );
+
+    res.json({ success: true, message: "Fichier sauvegardé dans MongoDB" });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Erreur Vercel KV",
+      message: "Erreur MongoDB",
       error: error.message,
     });
   }
@@ -123,18 +139,21 @@ async function fileSystemUpdate(category, filename, content, res) {
   }
 }
 
-async function databaseKvRead(category, filename, res) {
+async function databaseMongoDbRead(category, filename, res) {
   try {
-    const key = `files:${category}:${filename}`;
-    const content = await kv.get(key);
+    await client.connect();
+    const db = client.db("config_server");
+    const collection = db.collection("files");
 
-    res.send(content || "{}");
+    const file = await collection.findOne({ category, filename });
+
+    if (!file) {
+      return res.status(404).send("Fichier non trouvé");
+    }
+
+    res.send(file.content);
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Erreur Vercel KV",
-      error: error.message,
-    });
+    res.status(500).json({ error: error.message });
   }
 }
 
