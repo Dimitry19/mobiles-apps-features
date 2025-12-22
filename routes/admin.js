@@ -89,7 +89,7 @@ router.put("/file/:category/:filename", express.json(), async (req, res) => {
 async function databaseMongoDbUpdate(category, filename, content, res) {
   try {
     await client.connect();
-    const db = client.db("config_server");
+    const db = client.db("config-files");
     const collection = db.collection("files");
 
     // Upsert (insert ou update)
@@ -142,7 +142,7 @@ async function fileSystemUpdate(category, filename, content, res) {
 async function databaseMongoDbRead(category, filename, res) {
   try {
     await client.connect();
-    const db = client.db("config_server");
+    const db = client.db("config-files");
     const collection = db.collection("files");
 
     const file = await collection.findOne({ category, filename });

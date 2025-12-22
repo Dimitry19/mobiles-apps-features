@@ -23,6 +23,7 @@
     "express": "^5.2.1",
     "express-basic-auth": "^1.2.1",
     "express-session": "^1.18.2",
+    "mongodb": "^7.0.0",
     "nodemon": "^3.1.11"
   }
 }
