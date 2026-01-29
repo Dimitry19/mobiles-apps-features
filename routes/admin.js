@@ -3,15 +3,28 @@ const basicAuth = require('express-basic-auth');
 const fs = require('fs');
 const path = require('path');
 const { readJsonSafe } = require('../utils/jsonReader');
-const { kv } = require("@vercel/kv");
+
+ 
+ 
 const { MongoClient } = require("mongodb");
 
-const client = new MongoClient(process.env.MONGODB_URI);
+require("dotenv").config();
 
 const router = express.Router();
 const BASE_DIR = path.join(__dirname, "../data");
 
-// 🔐 (optionnel) middleware auth ici
+const uri = process.env.MONGODB_URI;
+
+// Vérification de sécurité
+if (!uri) {
+  throw new Error(
+    "MONGODB_URI n'est pas défini dans les variables d'environnement",
+  );
+}
+
+const clientMongoDB = new MongoClient(uri);
+let cachedClientMongoDB = null;
+
 // ==== CONFIGURATION ====
 require("dotenv").config();
 const ADMIN_USER = process.env.BASIC_USER || "admin";
@@ -33,7 +46,7 @@ router.get("/admin", adminAuthMiddleware, (req, res) => {
   res.sendFile(path.join(__dirname, "../public/admin.html"));
 });
 
-// 📂 Lister les catégories + fichiers
+//  Lister les catégories + fichiers
 router.get("/files", (req, res) => {
   const result = {};
 
@@ -47,7 +60,7 @@ router.get("/files", (req, res) => {
   res.json(result);
 });
 
-// 📄 Lire un fichier JSON
+//  Lire un fichier JSON
 router.get("/file", (req, res) => {
   const { category, file } = req.query;
 
@@ -59,7 +72,7 @@ router.get("/file", (req, res) => {
   }
 });
 
-// 💾 Sauvegarder un fichier JSON
+//  Sauvegarder un fichier JSON
 router.post("/file", express.json(), (req, res) => {
   const { category, file, content } = req.body;
   const filePath = path.join(BASE_DIR, category, file);
@@ -88,24 +101,40 @@ router.put("/file/:category/:filename", express.json(), async (req, res) => {
 
 async function databaseMongoDbUpdate(category, filename, content, res) {
   try {
-    await client.connect();
-    const db = client.db("config-files");
-    const collection = db.collection("files");
+    const collection = await getCollection();
 
     // Upsert (insert ou update)
-    await collection.updateOne(
+    const result = await collection.updateOne(
       { category, filename },
       {
         $set: {
           content,
           updatedAt: new Date(),
         },
+        $setOnInsert: {
+          // ← Ajout   seulement si nouveau document
+          createdAt: new Date(),
+          language: getLanguageFromFilename(filename),
+        },
       },
-      { upsert: true }
+      { upsert: true },
     );
 
-    res.json({ success: true, message: "Fichier sauvegardé dans MongoDB" });
+    console.log("Fichier sauvegardé:", {
+      category,
+      filename,
+      matched: result.matchedCount,
+      modified: result.modifiedCount,
+      upserted: result.upsertedCount,
+    });
+
+    res.json({
+      success: true,
+      message: "Fichier sauvegardé dans MongoDB",
+      isNew: result.upsertedCount > 0,
+    });
   } catch (error) {
+    console.error("Erreur MongoDB update:", error);
     res.status(500).json({
       success: false,
       message: "Erreur MongoDB",
@@ -141,11 +170,13 @@ async function fileSystemUpdate(category, filename, content, res) {
 
 async function databaseMongoDbRead(category, filename, res) {
   try {
-    await client.connect();
-    const db = client.db("config-files");
-    const collection = db.collection("files");
+    console.log("Recherche fichier:", { category, filename });
+
+    const collection = await getCollection();
 
     const file = await collection.findOne({ category, filename });
+
+    console.log("Fichier trouvé:", file ? "OUI" : "NON");
 
     if (!file) {
       return res.status(404).send("Fichier non trouvé");
@@ -153,7 +184,8 @@ async function databaseMongoDbRead(category, filename, res) {
 
     res.send(file.content);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error(" Erreur:", error);
+    res.status(500).json({ error: "databaseMongoDbRead:" + error.message });
   }
 }
 
@@ -167,7 +199,47 @@ async function fileSystemRead(category, file, res) {
   console.log(data);
   res.json(data);
 }
- 
+
+async function connectToDatabase() {
+  try {
+    if (cachedClientMongoDB) {
+      return cachedClientMongoDB;
+    }
+
+    await clientMongoDB.connect();
+    cachedClientMongoDB = clientMongoDB;
+    return clientMongoDB;
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erreur de connexion a la base de donnees" });
+  }
+}
+
+async function getCollection() {
+  try {
+    const client = await connectToDatabase();
+    const db = client.db("mobiles-features");
+    const collection = db.collection("features");
+    return collection;
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({
+        error:
+          "Erreur de recuperation de la collection depuis la base de donnees",
+      });
+  }
+}
+
+function getLanguageFromFilename(filename) {
+  if (filename.endsWith(".json")) return "json";
+  if (filename.endsWith(".yml") || filename.endsWith(".yaml")) return "yaml";
+  if (filename.endsWith(".xml")) return "xml";
+  if (filename.endsWith(".js")) return "javascript";
+  if (filename.endsWith(".properties")) return "ini";
+  return "plaintext";
+}
  
 
  module.exports = router;

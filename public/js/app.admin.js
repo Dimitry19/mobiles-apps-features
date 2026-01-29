@@ -66,14 +66,7 @@ async function openFile(category, filename) {
   }
 }
 
-function getLanguageFromFilename(filename) {
-  if (filename.endsWith('.json')) return 'json';
-  if (filename.endsWith('.yml') || filename.endsWith('.yaml')) return 'yaml';
-  if (filename.endsWith('.xml')) return 'xml';
-  if (filename.endsWith('.js')) return 'javascript';
-  if (filename.endsWith('.properties')) return 'ini';
-  return 'plaintext';
-}
+
 
 // ============================================
 // Sauvegarder un fichier (avec catégorie)
